@@ -283,7 +283,7 @@ public:
 
     // Kernel level shared memory storage
     SharedStorage& shared_storage = *reinterpret_cast<SharedStorage*>(smem_buf);
-    
+
     int thread_idx = int(threadIdx.x);
     int lane_idx = canonical_lane_idx();
     int warp_idx = canonical_warp_idx_sync();
@@ -365,7 +365,7 @@ public:
         return [] () { cute::cluster_wait(); };
       }
       else {
-        __syncthreads();
+        ark::sync_warps<MaxThreadsPerBlock / 32>();
         return [] () {}; // do nothing
       }
     } ();
