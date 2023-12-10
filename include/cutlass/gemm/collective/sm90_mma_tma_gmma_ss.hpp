@@ -326,7 +326,8 @@ struct CollectiveMma<
 
 
     // Obtain warp index
-    int warp_idx = canonical_warp_idx_sync();
+    constexpr int num_warps = size(TiledMma{}) / NumThreadsPerWarp;
+    int warp_idx = canonical_warp_idx_sync() % num_warps;
     int warp_group_thread_idx = thread_idx % NumThreadsPerWarpGroup;
 
     PipelineParams params;
@@ -353,7 +354,7 @@ struct CollectiveMma<
       cute::cluster_wait();
     }
     else {
-      __syncthreads();
+      ark::sync_warps<size(TiledMma{}) / 32>();
     }
 
     // Set predicate for the lowest lane_id in the warp
@@ -420,7 +421,7 @@ struct CollectiveMma<
     CUTE_STATIC_ASSERT_V(Int<DispatchPolicy::Stages>{} == size<2>(sA));        // PIPE
     CUTE_STATIC_ASSERT_V(Int<DispatchPolicy::Stages>{} == size<2>(sB));        // PIPE
 
-    __syncthreads();
+    ark::sync_warps<size(TiledMma{}) / 32>();
 
     tiled_mma.accumulate_ = GMMA::ScaleOut::Zero;
 

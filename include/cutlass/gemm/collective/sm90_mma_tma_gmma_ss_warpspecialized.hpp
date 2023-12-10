@@ -307,7 +307,8 @@ struct CollectiveMma<
   {
 
     using namespace cute;
-    int warp_idx = canonical_warp_idx_sync();
+    constexpr int num_warps = size(TiledMma{}) / NumThreadsPerWarp;
+    int warp_idx = canonical_warp_idx_sync() % num_warps;
     int warp_idx_in_warp_group  = warp_idx % 4;
     int lane_predicate = cute::elect_one_sync();
 
@@ -390,7 +391,8 @@ struct CollectiveMma<
       MainloopPipeline pipeline, 
       PipelineState smem_pipe_write)
   {
-    int warp_idx = canonical_warp_idx_sync();
+    constexpr int num_warps = size(TiledMma{}) / NumThreadsPerWarp;
+    int warp_idx = canonical_warp_idx_sync() % num_warps;
     int warp_idx_in_warp_group = warp_idx % 4;
     int lane_predicate = cute::elect_one_sync();
 
